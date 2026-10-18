@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Belajar Bahasa Melayu - Tipu Daya Burung</title>
+    <!-- Tailwind CSS for modern responsive styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .gloss-word {
+            position: relative;
+            cursor: pointer;
+            display: inline-block;
+            padding: 2px 4px;
+            margin: 2px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+        .gloss-word:hover {
+            background-color: #e0f2fe;
+            color: #0369a1;
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- Header Section -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-xl shadow-md shadow-indigo-100">
+                    🦚
+                </div>
+                <div>
+                    <h1 class="font-bold text-slate-900 leading-tight">Malay Story Reader</h1>
+                    <p class="text-xs text-slate-500 font-medium">Native Audio & Interactive Practice</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 bg-slate-100 p-1.5 rounded-xl text-xs font-semibold text-slate-600">
+                <span id="page-indicator">Page 1 of 8</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 max-w-4xl w-full mx-auto p-4 md:p-6 flex flex-col justify-between">
+
+        <!-- Progress Bar -->
+        <div class="w-full bg-slate-200 h-2 rounded-full mb-6 overflow-hidden">
+            <div id="progress-bar" class="bg-indigo-600 h-full w-1/8 transition-all duration-300"></div>
+        </div>
+
+        <div class="space-y-6">
+            
+            <!-- Section Header Tag -->
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <span id="section-tag" class="px-3 py-1 bg-indigo-50 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-lg border border-indigo-100">
+                    Paragraph 1
+                </span>
+                <span id="audio-file-badge" class="px-2.5 py-1 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-lg border border-emerald-100 flex items-center gap-1">
+                    <i data-lucide="music" class="w-3.5 h-3.5"></i> Audio: <span id="current-audio-name">01.wav / 1.mp3</span>
+                </span>
+            </div>
+
+            <!-- Malay Interactive Paragraph Box -->
+            <div class="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-slate-200/80 relative">
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Bahasa Melayu (Click word for definition)</h2>
+                </div>
+                <div id="malay-text-container" class="text-lg md:text-2xl font-medium leading-relaxed text-slate-900 min-h-[90px]">
+                    <!-- Populated dynamically -->
+                </div>
+
+                <!-- CUSTOM AUDIO CONTROL PANEL WITH FALLBACK SYNTHESIZER -->
+                <div class="mt-6 pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 bg-indigo-50/50 p-4 rounded-xl">
+                    <div class="flex items-center gap-3">
+                        <button id="play-native-audio-btn" onclick="toggleNativeAudio()" class="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-sm shadow-md transition-all active:scale-95">
+                            <i id="play-icon" data-lucide="play" class="w-5 h-5"></i>
+                            <span id="play-btn-label">Listen Native Audio</span>
+                        </button>
+                        <button onclick="stopNativeAudio()" class="p-2.5 text-slate-500 hover:text-slate-800 hover:bg-slate-200/60 rounded-xl transition-all" title="Stop Audio">
+                            <i data-lucide="square" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+
+                    <!-- Hidden HTML5 Audio Element -->
+                    <audio id="native-audio-player" class="hidden" onended="onAudioEnded()"></audio>
+
+                    <p id="audio-status-msg" class="text-xs text-indigo-700 font-medium flex items-center gap-1.5">
+                        <i data-lucide="volume-2" class="w-4 h-4 text-indigo-500"></i> Press to listen to recorded audio
+                    </p>
+                </div>
+            </div>
+
+            <!-- English Translation Box -->
+            <div class="bg-indigo-900 text-white rounded-2xl p-6 md:p-8 shadow-xl shadow-indigo-950/10">
+                <div class="flex items-center gap-2 mb-3 text-indigo-300 text-xs font-bold uppercase tracking-wider">
+                    <i data-lucide="languages" class="w-4 h-4"></i> English Translation
+                </div>
+                <p id="english-translation" class="text-base md:text-xl font-normal leading-relaxed text-indigo-100">
+                    <!-- Populated dynamically -->
+                </p>
+            </div>
+
+            <!-- Grammar Focus Card -->
+            <div id="grammar-card" class="bg-amber-50/60 border border-amber-200/80 rounded-2xl p-5">
+                <div class="flex items-center gap-2 text-amber-900 font-bold text-sm mb-2">
+                    <i data-lucide="sparkles" class="w-4 h-4 text-amber-600"></i> Grammar Focus
+                </div>
+                <div id="grammar-notes" class="text-sm text-amber-900/80 leading-relaxed">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="mt-8 pt-4 border-t border-slate-200 flex items-center justify-between gap-4">
+            <button id="prev-btn" onclick="prevPage()" class="flex items-center gap-2 px-5 py-3 rounded-xl border border-slate-300 font-semibold text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:hover:bg-transparent transition-all">
+                <i data-lucide="chevron-left" class="w-5 h-5"></i> Previous
+            </button>
+
+            <!-- Page Quick Jumper -->
+            <div class="hidden sm:flex items-center gap-1.5" id="pagination-dots">
+                <!-- Dots generated dynamically -->
+            </div>
+
+            <button id="next-btn" onclick="nextPage()" class="flex items-center gap-2 px-6 py-3 rounded-xl bg-indigo-600 text-white font-semibold hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition-all">
+                Next <i data-lucide="chevron-right" class="w-5 h-5"></i>
+            </button>
+        </div>
+
+    </main>
+
+    <!-- Word Insight Pop-up Modal -->
+    <div id="word-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl border border-slate-100 space-y-4 transform transition-all scale-100">
+            <div class="flex justify-between items-start">
+                <div>
+                    <span class="text-xs font-bold uppercase tracking-wider text-indigo-600" id="modal-pos">Word Focus</span>
+                    <h3 class="text-2xl font-bold text-slate-900" id="modal-malay">Word</h3>
+                </div>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                <p class="text-xs text-slate-400 font-medium">English Translation</p>
+                <p class="text-lg font-semibold text-slate-800" id="modal-english">Translation</p>
+            </div>
+
+            <p class="text-xs text-slate-500 leading-relaxed" id="modal-explanation">
+                Detailed grammar note for this word will go here.
+            </p>
+        </div>
+    </div>
+
+    <!-- Application Logic & Story Data -->
+    <script>
+        const storyPages = [
+            {
+                type: "title",
+                tag: "Story Title (Page 1)",
+                audioFiles: ["01.wav", "1.wav", "01.mp3", "1.mp3"],
+                malayText: "4. Tipu Daya Burung",
+                malayWords: [
+                    { m: "4.", e: "4", note: "Chapter number" },
+                    { m: "Tipu", e: "Trick / Deception", note: "Root word for trickery or deceit." },
+                    { m: "Daya", e: "Power / Scheme", note: "'Tipu daya' combined means 'Deception' or 'Tricks'." },
+                    { m: "Burung", e: "Bird", note: "Noun referring to a bird." }
+                ],
+                english: "4. The Bird's Deception",
+                grammar: "<b>Compound Words:</b> 'Tipu daya' is a compound phrase combining 'tipu' (cheat) and 'daya' (power), which together mean deception or trickery."
+            },
+            {
+                type: "paragraph",
+                tag: "Paragraph 1 (Page 2)",
+                audioFiles: ["2.wav", "02.wav", "2.mp3", "02.mp3"],
+                malayText: "Pada suatu hari, raja berdiri di tepi tasik istana sambil mengagumi beberapa ekor angsa berbulu keemasan. Tiba-tiba, seekor burung bertenggek di atas bahu raja dan mula menyanyi.",
+                malayWords: [
+                    { m: "Pada", e: "On / At", note: "Preposition used for time or abstract locations." },
+                    { m: "suatu", e: "A certain", note: "Indefinite quantifier." },
+                    { m: "hari,", e: "day,", note: "Noun." },
+                    { m: "raja", e: "king", note: "Noun for king/monarch." },
+                    { m: "berdiri", e: "stood", note: "Verb with prefix 'ber-' indicating an action state." },
+                    { m: "di", e: "at / by", note: "Preposition for physical location." },
+                    { m: "tepi", e: "edge", note: "Side or shore." },
+                    { m: "tasik", e: "lake", note: "Noun." },
+                    { m: "istana", e: "palace", note: "Noun." },
+                    { m: "sambil", e: "while", note: "Conjunction used when two actions happen at once." },
+                    { m: "mengagumi", e: "admiring", note: "Active verb using prefix 'meng-' on root 'agum'." },
+                    { m: "beberapa", e: "several", note: "Quantifier for plural items." },
+                    { m: "ekor", e: "tail (classifier)", note: "Classifier required when counting animals." },
+                    { m: "angsa", e: "geese", note: "Noun." },
+                    { m: "berbulu", e: "feathered", note: "Prefix 'ber-' + 'bulu' (feathers) = having feathers." },
+                    { m: "keemasan.", e: "golden.", note: "Adjective derived from 'emas' (gold)." },
+                    { m: "Tiba-tiba,", e: "Suddenly,", note: "Reduplicated adverb." },
+                    { m: "seekor", e: "a / one (animal)", note: "Prefix 'se-' (one) + animal classifier 'ekor'." },
+                    { m: "burung", e: "bird", note: "Noun." },
+                    { m: "bertenggek", e: "perched", note: "Verb with 'ber-' prefix." },
+                    { m: "di atas", e: "on top of", note: "Compound preposition for location." },
+                    { m: "bahu", e: "shoulder", note: "Noun." },
+                    { m: "raja", e: "king", note: "Noun." },
+                    { m: "dan", e: "and", note: "Conjunction." },
+                    { m: "mula", e: "started", note: "Verb." },
+                    { m: "menyanyi.", e: "singing.", note: "Active verb prefix 'men-' + root 'nyanyi'." }
+                ],
+                english: "One day, the king stood by the palace lake, admiring several golden-feathered geese. Suddenly, a bird perched on the king's shoulder and began to sing.",
+                grammar: "<b>Classifier 'Ekor':</b> Malay uses 'ekor' (literally tail) to count animals (e.g., <i>seekor burung</i> = one bird; <i>beberapa ekor angsa</i> = several geese)."
+            },
+            {
+                type: "paragraph",
+                tag: "Paragraph 2 (Page 3)",
+                audioFiles: ["3.wav", "03.wav", "3.mp3", "03.mp3"],
+                malayText: "Suara kamu sungguh merdu. Beta izinkan kamu tinggal di kawasan tasik ini, titah raja.",
+                malayWords: [
+                    { m: "\"Suara", e: "\"Voice", note: "Noun." },
+                    { m: "kamu", e: "your", note: "Pronoun for 'you/your'." },
+                    { m: "sungguh", e: "truly", note: "Adverb for emphasis." },
+                    { m: "merdu.", e: "melodious.", note: "Adjective describing sweet sounds." },
+                    { m: "Beta", e: "I (Royal)", note: "Royal pronoun used exclusively by the King." },
+                    { m: "izinkan", e: "allow", note: "Verb command/permission." },
+                    { m: "kamu", e: "you", note: "Pronoun." },
+                    { m: "tinggal", e: "live / stay", note: "Verb." },
+                    { m: "di", e: "in / at", note: "Preposition." },
+                    { m: "kawasan", e: "area", note: "Noun." },
+                    { m: "tasik", e: "lake", note: "Noun." },
+                    { m: "ini,\"", e: "this,\"", note: "Demonstrative pronoun." },
+                    { m: "titah", e: "decreed (Royal)", note: "Royal verb used for a monarch's speech." },
+                    { m: "raja.", e: "king.", note: "Noun." }
+                ],
+                english: "\"Your voice is truly melodious. I allow you to live in this lake area,\" decreed the king.",
+                grammar: "<b>Royal Register (Bahasa Istana):</b> The monarch refers to himself as <i>'Beta'</i> (I) and his speech is described as <i>'titah'</i> (decree/spoke) instead of normal words like 'saya' and 'cakap'."
+            },
+            {
+                type: "paragraph",
+                tag: "Paragraph 3 (Page 4)",
+                audioFiles: ["4.wav", "04.wav", "4.mp3", "04.mp3"],
+                malayText: "Sebenarnya, burung itu cemburu dengan angsa-angsa berbulu keemasan. Burung itu berbohong dengan berkata,",
+                malayWords: [
+                    { m: "Sebenarnya,", e: "Actually,", note: "Adverb introducing true state of affairs." },
+                    { m: "burung", e: "bird", note: "Noun." },
+                    { m: "itu", e: "that / the", note: "Demonstrative determiner." },
+                    { m: "cemburu", e: "jealous", note: "Adjective." },
+                    { m: "dengan", e: "of / with", note: "Preposition." },
+                    { m: "angsa-angsa", e: "geese", note: "Reduplicated noun showing plural form." },
+                    { m: "berbulu", e: "feathered", note: "Adjective." },
+                    { m: "keemasan.", e: "golden.", note: "Adjective." },
+                    { m: "Burung", e: "Bird", note: "Noun." },
+                    { m: "itu", e: "the", note: "Determiner." },
+                    { m: "berbohong", e: "lied", note: "Verb with prefix 'ber-'." },
+                    { m: "dengan", e: "by", note: "Preposition." },
+                    { m: "berkata,", e: "saying,", note: "Verb with prefix 'ber-'." }
+                ],
+                english: "In truth, the bird was jealous of the golden-feathered geese. The bird lied, saying,",
+                grammar: "<b>Pluralization:</b> Malay plurals are often made by repeating the noun (Reduplication): <i>angsa</i> (one goose) → <i>angsa-angsa</i> (geese)."
+            },
+            {
+                type: "paragraph",
+                tag: "Paragraph 4 (Page 5)",
+                audioFiles: ["5.wav", "05.wav", "5.mp3", "05.mp3"],
+                malayText: "Hamba takut dengan angsa-angsa di tasik ini kerana mereka pernah memberi amaran akan membunuh hamba jika tinggal di sini.",
+                malayWords: [
+                    { m: "\"Hamba", e: "\"I (Humble)", note: "Submissive pronoun used when speaking to royalty." },
+                    { m: "takut", e: "afraid", note: "Adjective." },
+                    { m: "dengan", e: "of", note: "Preposition." },
+                    { m: "angsa-angsa", e: "geese", note: "Plural noun." },
+                    { m: "di", e: "in", note: "Preposition." },
+                    { m: "tasik", e: "lake", note: "Noun." },
+                    { m: "ini", e: "this", note: "Determiner." },
+                    { m: "kerana", e: "because", note: "Conjunction." },
+                    { m: "mereka", e: "they", note: "Third-person plural pronoun." },
+                    { m: "pernah", e: "once / ever", note: "Aspect auxiliary for past experience." },
+                    { m: "memberi", e: "gave", note: "Active verb (mem- + beri)." },
+                    { m: "amaran", e: "warning", note: "Noun derived from 'amar'." },
+                    { m: "akan", e: "will / going to", note: "Future tense indicator." },
+                    { m: "membunuh", e: "kill", note: "Active verb (mem- + bunuh)." },
+                    { m: "hamba", e: "me", note: "Humble pronoun." },
+                    { m: "jika", e: "if", note: "Conjunction." },
+                    { m: "tinggal", e: "stay", note: "Verb." },
+                    { m: "di", e: "in", note: "Preposition." },
+                    { m: "sini.\"", e: "here.\"", note: "Adverb of place." }
+                ],
+                english: "\"I am afraid of the geese in this lake because they once gave me a warning that they would kill me if I stayed here.\"",
+                grammar: "<b>Humble Honorific 'Hamba':</b> When ordinary subjects or animals address royalty, they use <i>'Hamba'</i> (literally 'servant') to express 'I/me'."
+            },
+            {
+                type: "paragraph",
+                tag: "Paragraph 5 (Page 6)",
+                audioFiles: ["6.wav", "06.wav", "6.mp3", "06.mp3"],
+                malayText: "Raja pun mengarah pengawal-pengawalnya membunuh semua angsa di tasik. Angsa-angsa terkejut dan berasa ngeri mendengar tindakan raja mereka. Mereka pun terbang dari tasik itu sambil menjerit,",
+                malayWords: [
+                    { m: "Raja", e: "King", note: "Noun." },
+                    { m: "pun", e: "then / so", note: "Emphasis particle." },
+                    { m: "mengarah", e: "ordered", note: "Active verb (meng- + arah)." },
+                    { m: "pengawal-pengawalnya", e: "his guards", note: "Reduplicated noun + suffix '-nya' (his)." },
+                    { m: "membunuh", e: "to kill", note: "Verb." },
+                    { m: "semua", e: "all", note: "Quantifier." },
+                    { m: "angsa", e: "geese", note: "Noun." },
+                    { m: "di", e: "at", note: "Preposition." },
+                    { m: "tasik.", e: "lake.", note: "Noun." },
+                    { m: "Angsa-angsa", e: "The geese", note: "Plural noun." },
+                    { m: "terkejut", e: "startled / shocked", note: "Prefix 'ter-' indicates an unintentional state of shock." },
+                    { m: "dan", e: "and", note: "Conjunction." },
+                    { m: "berasa", e: "felt", note: "Verb (ber- + rasa)." },
+                    { m: "ngeri", e: "horrified", note: "Adjective." },
+                    { m: "mendengar", e: "hearing", note: "Active verb (men- + dengar)." },
+                    { m: "tindakan", e: "action", note: "Noun derived from 'tindak'." },
+                    { m: "raja", e: "king", note: "Noun." },
+                    { m: "mereka.", e: "their.", note: "Possessive pronoun." },
+                    { m: "Mereka", e: "They", note: "Pronoun." },
+                    { m: "pun", e: "then", note: "Particle." },
+                    { m: "terbang", e: "flew", note: "Verb." },
+                    { m: "dari", e: "from", note: "Preposition of origin." },
+                    { m: "tasik", e: "lake", note: "Noun." },
+                    { m: "itu", e: "that", note: "Determiner." },
+                    { m: "sambil", e: "while", note: "Conjunction." },
+                    { m: "menjerit,", e: "screaming,", note: "Active verb (men- + jerit)." }
+                ],
+                english: "The king then ordered his guards to kill all the geese in the lake. The geese were shocked and horrified to hear their king's actions. They flew away from the lake while screaming,",
+                grammar: "<b>Prefix 'ter-':</b> Used here in <i>'terkejut'</i> to show an involuntary state of reaction (being shocked/startled)."
+            },
+            {
+                type: "paragraph",
+                tag: "Paragraph 6 (Page 7)",
+                audioFiles: ["7.wav", "07.wav", "7.mp3", "07.mp3"],
+                malayText: "Bagaimana baginda boleh mempercayai kata-kata seekor burung yang baru datang ke sini berbanding dengan kami yang telah lama menetap di tasik ini?",
+                malayWords: [
+                    { m: "\"Bagaimana", e: "\"How", note: "Interrogative word." },
+                    { m: "baginda", e: "His Majesty", note: "Third-person royal pronoun for monarchs." },
+                    { m: "boleh", e: "could / can", note: "Modal auxiliary." },
+                    { m: "mempercayai", e: "trust / believe", note: "Complex active verb (mem- + percaya + -i)." },
+                    { m: "kata-kata", e: "words", note: "Reduplicated noun." },
+                    { m: "seekor", e: "a / one (animal)", note: "Classifier phrase." },
+                    { m: "burung", e: "bird", note: "Noun." },
+                    { m: "yang", e: "that / who", note: "Relative pronoun connector." },
+                    { m: "baru", e: "just / newly", note: "Adverb." },
+                    { m: "datang", e: "arrived", note: "Verb." },
+                    { m: "ke", e: "to", note: "Preposition of direction." },
+                    { m: "sini", e: "here", note: "Location adverb." },
+                    { m: "berbanding", e: "compared", note: "Comparative verb." },
+                    { m: "dengan", e: "with", note: "Preposition." },
+                    { m: "kami", e: "us (excluding listener)", note: "Exclusive 'we/us' pronoun." },
+                    { m: "yang", e: "who", note: "Relative pronoun." },
+                    { m: "telah", e: "have", note: "Past marker." },
+                    { m: "lama", e: "long (time)", note: "Adjective." },
+                    { m: "menetap", e: "resided", note: "Active verb (me- + tetap)." },
+                    { m: "di", e: "in", note: "Preposition." },
+                    { m: "tasik", e: "lake", note: "Noun." },
+                    { m: "ini?\"", e: "this?\"", note: "Determiner." }
+                ],
+                english: "\"How could His Majesty trust the words of a bird that has just arrived here compared to us, who have lived in this lake for a long time?\"",
+                grammar: "<b>Kami vs Kita:</b> <i>'Kami'</i> means 'we/us' excluding the listener (the king in this case), whereas 'kita' includes the listener."
+            },
+            {
+                type: "paragraph",
+                tag: "Paragraph 7 (Page 8)",
+                audioFiles: ["8.wav", "08.wav", "8.mp3", "08.mp3"],
+                malayText: "Barulah raja sedar akan kesilapan yang telah baginda lakukan tetapi malangnya sudah terlambat.",
+                malayWords: [
+                    { m: "Barulah", e: "Only then", note: "Root 'baru' + focus particle '-lah'." },
+                    { m: "raja", e: "king", note: "Noun." },
+                    { m: "sedar", e: "realized", note: "Verb/Adjective." },
+                    { m: "akan", e: "of / about", note: "Preposition." },
+                    { m: "kesilapan", e: "mistake", note: "Noun with circumfix 'ke-...-an' around root 'silap' (error)." },
+                    { m: "yang", e: "that", note: "Relative pronoun." },
+                    { m: "telah", e: "had", note: "Aspect marker." },
+                    { m: "baginda", e: "he (royal)", note: "Royal pronoun." },
+                    { m: "lakukan", e: "committed / done", note: "Verb." },
+                    { m: "tetapi", e: "but", note: "Conjunction." },
+                    { m: "malangnya", e: "unfortunately", note: "Adverb derived from 'malang' + '-nya'." },
+                    { m: "sudah", e: "already", note: "Aspect marker." },
+                    { m: "terlambat.", e: "too late.", note: "Prefix 'ter-' + 'lambat' = passed the time limit." }
+                ],
+                english: "Only then did the king realize the mistake he had committed, but unfortunately, it was already too late.",
+                grammar: "<b>Circumfix 'ke-...-an':</b> Converts root words into abstract nouns. Here, <i>silap</i> (wrong) becomes <i>kesilapan</i> (a mistake/error)."
+            },
+            {
+                type: "moral",
+                tag: "Moral Box (Summary)",
+                audioFiles: ["9.wav", "09.wav", "9.mp3", "09.mp3"],
+                malayText: "Fikir masak-masak sebelum bertindak supaya tidak menyesal kelak.",
+                malayWords: [
+                    { m: "Fikir", e: "Think", note: "Verb stem." },
+                    { m: "masak-masak", e: "thoroughly / deeply", note: "Idiomatic reduplication (literally: cooked-cooked) meaning deeply/carefully." },
+                    { m: "sebelum", e: "before", note: "Preposition." },
+                    { m: "bertindak", e: "acting", note: "Verb (ber- + tindak)." },
+                    { m: "supaya", e: "so that", note: "Conjunction." },
+                    { m: "tidak", e: "not", note: "Negation." },
+                    { m: "menyesal", e: "regret", note: "Verb." },
+                    { m: "kelak.", e: "later.", note: "Time adverb meaning in the future." }
+                ],
+                english: "Think thoroughly before acting so you won't regret it later.",
+                grammar: "<b>Idiomatic Expression:</b> <i>'Fikir masak-masak'</i> is a famous Malay proverb. 'Masak' means cooked, but repeating it forms an idiom for 'thinking until well-matured/thorough'."
+            }
+        ];
+
+        let currentPage = 0;
+        let isAudioPlaying = false;
+        let currentAudioCandidateIndex = 0;
+
+        function initApp() {
+            renderPaginationDots();
+            renderPage();
+            lucide.createIcons();
+        }
+
+        function renderPaginationDots() {
+            const container = document.getElementById('pagination-dots');
+            container.innerHTML = '';
+            storyPages.forEach((_, idx) => {
+                const btn = document.createElement('button');
+                btn.className = `w-3 h-3 rounded-full transition-all ${idx === currentPage ? 'bg-indigo-600 w-6' : 'bg-slate-300 hover:bg-slate-400'}`;
+                btn.onclick = () => goToPage(idx);
+                container.appendChild(btn);
+            });
+        }
+
+        function renderPage() {
+            stopNativeAudio();
+            const page = storyPages[currentPage];
+            
+            // Progress Bar & Badges
+            const progress = ((currentPage + 1) / storyPages.length) * 100;
+            document.getElementById('progress-bar').style.width = `${progress}%`;
+            document.getElementById('page-indicator').textContent = `Page ${currentPage + 1} of ${storyPages.length}`;
+            document.getElementById('section-tag').textContent = page.tag;
+            document.getElementById('current-audio-name').textContent = page.audioFiles.join(" / ");
+
+            // Reset Audio Candidates
+            currentAudioCandidateIndex = 0;
+            const audioPlayer = document.getElementById('native-audio-player');
+            audioPlayer.src = page.audioFiles[0];
+
+            // Moral card styling
+            const grammarCard = document.getElementById('grammar-card');
+            if (page.type === 'moral') {
+                grammarCard.className = "bg-emerald-50 border border-emerald-200 rounded-2xl p-5";
+            } else {
+                grammarCard.className = "bg-amber-50/60 border border-amber-200/80 rounded-2xl p-5";
+            }
+
+            // Render Malay interactive word spans
+            const textContainer = document.getElementById('malay-text-container');
+            textContainer.innerHTML = '';
+            
+            page.malayWords.forEach((wordObj, wIdx) => {
+                const wordSpan = document.createElement('span');
+                wordSpan.id = `word-span-${wIdx}`;
+                wordSpan.className = 'gloss-word';
+                wordSpan.textContent = wordObj.m;
+                wordSpan.onclick = () => openWordModal(wIdx);
+                textContainer.appendChild(wordSpan);
+                textContainer.appendChild(document.createTextNode(' '));
+            });
+
+            // English Translation & Grammar Note
+            document.getElementById('english-translation').textContent = page.english;
+            document.getElementById('grammar-notes').innerHTML = page.grammar;
+
+            // Buttons state
+            document.getElementById('prev-btn').disabled = currentPage === 0;
+            const nextBtn = document.getElementById('next-btn');
+            if (currentPage === storyPages.length - 1) {
+                nextBtn.innerHTML = `Finish <i data-lucide="check" class="w-5 h-5"></i>`;
+            } else {
+                nextBtn.innerHTML = `Next <i data-lucide="chevron-right" class="w-5 h-5"></i>`;
+            }
+
+            renderPaginationDots();
+            lucide.createIcons();
+        }
+
+        // Multi-candidate Native Audio + Fallback Speech Synthesis Logic
+        function toggleNativeAudio() {
+            const audioPlayer = document.getElementById('native-audio-player');
+            if (isAudioPlaying) {
+                audioPlayer.pause();
+                window.speechSynthesis.cancel();
+                setAudioPlayingUI(false);
+            } else {
+                tryPlayCurrentCandidate();
+            }
+        }
+
+        function tryPlayCurrentCandidate() {
+            const page = storyPages[currentPage];
+            const audioPlayer = document.getElementById('native-audio-player');
+
+            if (currentAudioCandidateIndex < page.audioFiles.length) {
+                const candidateSrc = page.audioFiles[currentAudioCandidateIndex];
+                audioPlayer.src = candidateSrc;
+                audioPlayer.play().then(() => {
+                    setAudioPlayingUI(true);
+                    document.getElementById('audio-status-msg').innerHTML = `<i data-lucide="volume-2" class="w-4 h-4 text-emerald-600"></i> Playing: <b>${candidateSrc}</b>`;
+                    lucide.createIcons();
+                }).catch(() => {
+                    // Current file failed to play, try next candidate format (.wav / .mp3)
+                    currentAudioCandidateIndex++;
+                    tryPlayCurrentCandidate();
+                });
+            } else {
+                // If all local files (.wav & .mp3) fail to load, fall back to Web Speech Synthesis
+                playFallbackSpeech();
+            }
+        }
+
+        function playFallbackSpeech() {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const textToSay = storyPages[currentPage].malayText;
+                const utterance = new SpeechSynthesisUtterance(textToSay);
+                utterance.lang = 'ms-MY'; // Bahasa Melayu language code
+                utterance.rate = 0.9; // Slightly slower for language learning
+
+                utterance.onstart = () => {
+                    setAudioPlayingUI(true);
+                    document.getElementById('audio-status-msg').innerHTML = `<i data-lucide="sparkles" class="w-4 h-4 text-indigo-600"></i> Speaking via Speech Assistant`;
+                    lucide.createIcons();
+                };
+
+                utterance.onend = () => {
+                    setAudioPlayingUI(false);
+                };
+
+                utterance.onerror = () => {
+                    setAudioPlayingUI(false);
+                    alert("Audio file not found in directory. Please place your audio files (e.g. 2.wav, 3.wav, or 2.mp3) in the same folder as index.html.");
+                };
+
+                window.speechSynthesis.speak(utterance);
+            } else {
+                setAudioPlayingUI(false);
+                alert("Audio could not be played. Please verify your .wav or .mp3 audio files are saved in the exact same folder as this index.html file.");
+            }
+        }
+
+        function stopNativeAudio() {
+            const audioPlayer = document.getElementById('native-audio-player');
+            if (audioPlayer) {
+                audioPlayer.pause();
+                audioPlayer.currentTime = 0;
+            }
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+            }
+            setAudioPlayingUI(false);
+        }
+
+        function onAudioEnded() {
+            setAudioPlayingUI(false);
+        }
+
+        function setAudioPlayingUI(playing) {
+            isAudioPlaying = playing;
+            const label = document.getElementById('play-btn-label');
+            const btn = document.getElementById('play-native-audio-btn');
+            const icon = document.getElementById('play-icon');
+
+            if (playing) {
+                label.textContent = "Pause Audio";
+                btn.classList.replace('bg-indigo-600', 'bg-amber-600');
+                btn.classList.replace('hover:bg-indigo-700', 'hover:bg-amber-700');
+                if (icon) icon.setAttribute('data-lucide', 'pause');
+            } else {
+                label.textContent = "Listen Native Audio";
+                btn.classList.replace('bg-amber-600', 'bg-indigo-600');
+                btn.classList.replace('hover:bg-amber-700', 'hover:bg-indigo-700');
+                if (icon) icon.setAttribute('data-lucide', 'play');
+                document.getElementById('audio-status-msg').innerHTML = `<i data-lucide="volume-2" class="w-4 h-4 text-indigo-500"></i> Press to listen to recorded audio`;
+            }
+            lucide.createIcons();
+        }
+
+        function openWordModal(wIdx) {
+            stopNativeAudio();
+            const wordData = storyPages[currentPage].malayWords[wIdx];
+            
+            document.getElementById('modal-malay').textContent = wordData.m.replace(/[.,"?]/g, '');
+            document.getElementById('modal-english').textContent = wordData.e;
+            document.getElementById('modal-explanation').textContent = wordData.note;
+            document.getElementById('modal-pos').textContent = `Word #${wIdx + 1} Insight`;
+            
+            const modal = document.getElementById('word-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('word-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function nextPage() {
+            if (currentPage < storyPages.length - 1) {
+                currentPage++;
+                renderPage();
+            }
+        }
+
+        function prevPage() {
+            if (currentPage > 0) {
+                currentPage--;
+                renderPage();
+            }
+        }
+
+        function goToPage(idx) {
+            currentPage = idx;
+            renderPage();
+        }
+
+        // Initialize App on Load
+        window.onload = initApp;
+    </script>
+</body>
+</html>
