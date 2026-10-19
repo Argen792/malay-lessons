@@ -1,4 +1,4 @@
-const CACHE_NAME = 'argenling-pwa-2-2-v1';
+const CACHE_NAME = 'argenling-pwa-2-2-v3-completion-fix';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png'];
 const APP_URL = new URL('./index.html', self.registration.scope).href;
 async function warmCore() {
