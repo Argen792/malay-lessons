@@ -879,7 +879,7 @@
             if (storyPages[currentPage]?.isFinalPage) return;
             if (completedLessons.has(currentPage)) completedLessons.delete(currentPage);
             else completedLessons.add(currentPage);
-            if (!isFinalPage) lastReadLesson = currentPage;
+            lastReadLesson = currentPage;
             saveProgress();
             updateCompletedUI();
             renderPaginationDots();
@@ -949,6 +949,11 @@
                 img.src=lessonImages[i]; img.loading='lazy'; img.decoding='async';
                 img.alt=page.isFinalPage?'Final surprise illustration':`Lesson ${i+1} illustration`;
                 img.style='width:100%;aspect-ratio:16/9;object-fit:cover;display:block';
+                if (page.isFinalPage) {
+                    img.style.filter = 'blur(22px)';
+                    img.style.transform = 'scale(1.08)';
+                    img.style.opacity = '0.82';
+                }
                 const label=document.createElement('div');
                 label.className='p-3 flex justify-between items-center gap-2';
                 const title=document.createElement('span');
