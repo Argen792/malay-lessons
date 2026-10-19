@@ -879,7 +879,7 @@
             if (storyPages[currentPage]?.isFinalPage) return;
             if (completedLessons.has(currentPage)) completedLessons.delete(currentPage);
             else completedLessons.add(currentPage);
-            if (!isFinalPage) lastReadLesson = currentPage;
+            lastReadLesson = currentPage;
             saveProgress();
             updateCompletedUI();
             renderPaginationDots();
